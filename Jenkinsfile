@@ -29,23 +29,33 @@ pipeline {
                     echo 'Run tests'
                     sh 'npm test'
                     echo 'Tests passed'
-                    echo 'Running quality scan'
+                    echo 'Running quality scan'                    
+                }
+                withSonarQubeEnv('sonarqube') {
+                    script {
+                        def scannerHome = tool 'sonarqube';
+                        sh "${scannerHome}/bin/sonar-scanner \
+                          -D sonar.login=admin \
+                          -D sonar.password=admin \
+                          -D sonar.projectKey=internal \
+                          -D sonar.host.url=http://35.193.67.2:9000/"
+                    }
                 }
             }
         }
         
-        stage('SonarQube analysis') {
-            steps {
-                def scannerHome = tool 'sonarqube';
-                withSonarQubeEnv('sonarqube') {
-                  sh "${scannerHome}/bin/sonar-scanner \
-                  -D sonar.login=admin \
-                  -D sonar.password=admin \
-                  -D sonar.projectKey=internal \
-                  -D sonar.host.url=http://35.193.67.2:9000/"
-                }
-            }
-        }
+        // stage('SonarQube analysis') {
+        //     steps {
+        //         def scannerHome = tool 'sonarqube';
+        //         withSonarQubeEnv('sonarqube') {
+        //           sh "${scannerHome}/bin/sonar-scanner \
+        //           -D sonar.login=admin \
+        //           -D sonar.password=admin \
+        //           -D sonar.projectKey=internal \
+        //           -D sonar.host.url=http://35.193.67.2:9000/"
+        //         }
+        //     }
+        // }
 
 
         stage('Stage 2 - build internal') {
