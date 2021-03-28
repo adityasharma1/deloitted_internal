@@ -30,17 +30,22 @@ pipeline {
                     sh 'npm test'
                     echo 'Tests passed'
                     echo 'Running quality scan'
-                    def scannerHome = tool 'sonarqube';
-                      withSonarQubeEnv('sonarqube') {
-                      sh "${scannerHome}/bin/sonar-scanner \
-                      -D sonar.login=admin \
-                      -D sonar.password=admin \
-                      -D sonar.projectKey=internal \
-                      -D sonar.host.url=http://35.193.67.2:9000/"
-                    }
                 }
             }
         }
+        
+        stage('SonarQube analysis') {
+            def scannerHome = tool 'sonarqube';
+            withSonarQubeEnv('sonarqube') {
+              sh "${scannerHome}/bin/sonar-scanner \
+              -D sonar.login=admin \
+              -D sonar.password=admin \
+              -D sonar.projectKey=internal \
+              -D sonar.host.url=http://35.193.67.2:9000/"
+            }
+        }
+
+
         stage('Stage 2 - build internal') {
             steps {
                 echo '****************************** Stage 3'
