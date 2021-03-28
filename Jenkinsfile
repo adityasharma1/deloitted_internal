@@ -41,6 +41,14 @@ pipeline {
                           -D sonar.host.url=http://35.193.67.2:9000/"
                     }
                 }
+                timeout(time: 1, unit: 'HOURS') {
+                    script {
+                        def qg = waitForQualityGate() 
+                        if (qg.status != 'OK') {
+                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                        }
+                    }
+                }
             }
         }
         
