@@ -16,7 +16,7 @@ pipeline {
             }
         }
         
-        stage('Stage 2 - build internal') {
+        stage('Stage 2 - get source and quality check') {
             steps {
                 echo '****************************** Stage 3'
                 dir("${env.WORKSPACE}/internal"){
@@ -28,13 +28,29 @@ pipeline {
                     sh 'npm install'
                     echo 'Run tests'
                     sh 'npm test'
-                    echo 'Tests passed on to build Docker container'
+                    echo 'Tests passed'
+                    echo 'Running quality scan'
+                    def scannerHome = tool 'sonarqube';
+                      withSonarQubeEnv('sonarqube') {
+                      sh "${scannerHome}/bin/sonar-scanner \
+                      -D sonar.login=admin \
+                      -D sonar.password=admin \
+                      -D sonar.projectKey=internal \
+                      -D sonar.host.url=http://35.193.67.2:9000/"
+                    }
+                }
+            }
+        }
+        stage('Stage 2 - build internal') {
+            steps {
+                echo '****************************** Stage 3'
+                dir("${env.WORKSPACE}/internal"){
                     echo "build id = ${env.BUILD_ID}"
                     sh "gcloud builds submit -t gcr.io/${projectId}/internal-image:v2.${env.BUILD_ID} ."
                 }
             }
         }
-        stage('Stage 3') {
+        stage('Stage 3 - deploy new image') {
             steps {
                 echo 'Get cluster credentials'
                 sh 'gcloud container clusters get-credentials demo-events-feed-cluster --zone us-central1-a --project deloitte-demo-308622'
