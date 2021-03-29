@@ -26,7 +26,7 @@ const mockEvents = {
 
 
 
-// health endpoint - returns an empty array  test
+// health endpoint - returns an empty array  test for demo
 app.get('/', (req, res) => {
     res.json([]);
 });
